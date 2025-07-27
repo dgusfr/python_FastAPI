@@ -4,8 +4,11 @@ import requests
 app = FastAPI()
 
 
-@app.get("/api/restaurants/{restaurant}", response_model=dict)
+@app.get("/api/restaurants/")
 def get_restaurants(restaurant: str = Query(None)):
+    """
+    Fetches restaurant data from an external API and returns the menu for a specific restaurant
+    """
     url = "https://guilhermeonrails.github.io/api-restaurantes/restaurantes.json"
 
     response = requests.get(url)
@@ -28,4 +31,4 @@ def get_restaurants(restaurant: str = Query(None)):
         return {"Restaurant": restaurant, "Menu": data_restaurant}
 
     else:
-        print(f"Error: {response.status_code}")
+        print(f"Error: {response.status_code} - {response.text}")
