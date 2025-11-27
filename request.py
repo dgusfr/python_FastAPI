@@ -3,10 +3,8 @@ import json
 
 url = "https://guilhermeonrails.github.io/api-restaurantes/restaurantes.json"
 
-# Buscando dados
 response = requests.get(url)
 
-# Verificando response
 if response.status_code == 200:
     data_json = response.json()
     data_restaurant = {}
