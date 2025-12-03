@@ -20,7 +20,8 @@ def get_db():
 
 @app.post("/estudantes/", response_model=schemas.StudentResponse)
 def create_student(student: schemas.StudentCreate, db: Session = Depends(get_db)):
-    db_student = models.Student(name=student.name, age=student.age)
+    # Desestruturamos os dados vindos do navegador e model_dump converte em um dicionario com os dados validados, para chamarmos o construtor e criarmos o objeto estudante
+    db_student = models.Student(**student.model_dump())
     db.add(db_student)
     db.commit()
     db.refresh(db_student)
