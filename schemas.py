@@ -21,3 +21,14 @@ class EstudanteResponse(EstudanteBase):
 class MatriculaBase(BaseModel):
     student_id: int
     discipline_name: str
+
+
+class MatriculaCreate(MatriculaBase):
+    pass
+
+
+class MatriculaResponse(MatriculaBase):
+    id: int
+
+    class Config:
+        from_atributes = True
