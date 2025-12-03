@@ -1,34 +1,33 @@
 from pydantic import BaseModel
 
 
-class EstudanteBase(BaseModel):
+class StudentBase(BaseModel):
     name: str
     age: int
 
 
-class EstudanteCreate(EstudanteBase):
+class StudentCreate(StudentBase):
     pass
 
 
-# Definimos que podemos ler os campos do estudante direto do modelo
-class EstudanteResponse(EstudanteBase):
+class StudentResponse(StudentBase):
     id: int
 
     class Config:
-        from_atributes = True
+        from_attributes = True
 
 
-class MatriculaBase(BaseModel):
+class EnrollmentBase(BaseModel):
     student_id: int
     discipline_name: str
 
 
-class MatriculaCreate(MatriculaBase):
+class EnrollmentCreate(EnrollmentBase):
     pass
 
 
-class MatriculaResponse(MatriculaBase):
+class EnrollmentResponse(EnrollmentBase):
     id: int
 
     class Config:
-        from_atributes = True
+        from_attributes = True
