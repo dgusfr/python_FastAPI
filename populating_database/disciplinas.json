@@ -1,0 +1,5 @@
+[
+  { "nome": "Estruturas de Dados", "descricao": "Listas, pilhas, filas e árvores binárias." },
+  { "nome": "Redes de Computadores", "descricao": "Modelo OSI, protocolos TCP/IP e endereçamento IP." },
+  { "nome": "Cálculo I", "descricao": "Limites, derivadas e integrais básicas." }
+]
