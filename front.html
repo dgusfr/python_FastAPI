@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Escola Didatica - Simulador</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h2 { margin-top: 30px; }
+    form { margin-bottom: 20px; padding: 10px; border: 1px solid #ccc; }
+    label { display: block; margin-top: 8px; }
+    input, select, button { margin-top: 4px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+    th, td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; }
+    th { background: #f0f0f0; }
+    .small { font-size: 12px; color: #555; }
+  </style>
+</head>
+<body>
+  <h1>Escola Didatica - Simulação</h1>
+
+  <!-- Professores -->
+  <h2>Professores</h2>
+  <form id="formProfessor">
+    <label>Nome do professor:
+      <input type="text" id="profNome" required>
+    </label>
+    <button type="submit">Adicionar Professor</button>
+  </form>
+  <table id="tabelaProfessores">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nome</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <!-- Disciplinas -->
+  <h2>Disciplinas</h2>
+  <form id="formDisciplina">
+    <label>Nome da disciplina:
+      <input type="text" id="discNome" required>
+    </label>
+    <label>Descrição:
+      <input type="text" id="discDesc" required>
+    </label>
+    <label>Professor responsável:
+      <select id="discProfessorId" required>
+        <option value="">Selecione um professor</option>
+      </select>
+    </label>
+    <button type="submit">Adicionar Disciplina</button>
+  </form>
+  <table id="tabelaDisciplinas">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nome</th>
+        <th>Descrição</th>
+        <th>Professor</th>
+        <th>Alunos matriculados</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <!-- Estudantes -->
+  <h2>Estudantes</h2>
+  <form id="formEstudante">
+    <label>Nome do estudante:
+      <input type="text" id="estNome" required>
+    </label>
+    <button type="submit">Adicionar Estudante</button>
+  </form>
+  <table id="tabelaEstudantes">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nome</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <!-- Matrículas -->
+  <h2>Matrículas</h2>
+  <form id="formMatricula">
+    <label>Estudante:
+      <select id="matEstudanteId" required>
+        <option value="">Selecione um estudante</option>
+      </select>
+    </label>
+    <label>Disciplina:
+      <select id="matDisciplinaId" required>
+        <option value="">Selecione uma disciplina</option>
+      </select>
+    </label>
+    <button type="submit">Matricular</button>
+  </form>
+  <p class="small">
+    A tabela de disciplinas acima é atualizada mostrando os alunos matriculados em cada disciplina.
+  </p>
+
+  <script>
+    // "Banco de dados" em memória
+    let professores = [];
+    let disciplinas = [];
+    let estudantes = [];
+    let matriculas = []; // { estudanteId, disciplinaId }
+
+    let proximoIdProfessor = 1;
+    let proximoIdDisciplina = 1;
+    let proximoIdEstudante = 1;
+
+    // Referências aos elementos
+    const formProfessor = document.getElementById('formProfessor');
+    const profNomeInput = document.getElementById('profNome');
+    const tabelaProfessoresBody = document.querySelector('#tabelaProfessores tbody');
+    const discProfessorSelect = document.getElementById('discProfessorId');
+
+    const formDisciplina = document.getElementById('formDisciplina');
+    const discNomeInput = document.getElementById('discNome');
+    const discDescInput = document.getElementById('discDesc');
+    const tabelaDisciplinasBody = document.querySelector('#tabelaDisciplinas tbody');
+    const matDisciplinaSelect = document.getElementById('matDisciplinaId');
+
+    const formEstudante = document.getElementById('formEstudante');
+    const estNomeInput = document.getElementById('estNome');
+    const tabelaEstudantesBody = document.querySelector('#tabelaEstudantes tbody');
+    const matEstudanteSelect = document.getElementById('matEstudanteId');
+
+    const formMatricula = document.getElementById('formMatricula');
+
+    // Helpers de renderização
+    function renderProfessores() {
+      tabelaProfessoresBody.innerHTML = '';
+      discProfessorSelect.innerHTML = '<option value="">Selecione um professor</option>';
+
+      professores.forEach(prof => {
+        // tabela
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${prof.id}</td>
+          <td>${prof.nome}</td>
+        `;
+        tabelaProfessoresBody.appendChild(tr);
+
+        // select de professor em disciplina
+        const option = document.createElement('option');
+        option.value = prof.id;
+        option.textContent = `${prof.id} - ${prof.nome}`;
+        discProfessorSelect.appendChild(option);
+      });
+    }
+
+    function renderEstudantes() {
+      tabelaEstudantesBody.innerHTML = '';
+      matEstudanteSelect.innerHTML = '<option value="">Selecione um estudante</option>';
+
+      estudantes.forEach(est => {
+        // tabela
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${est.id}</td>
+          <td>${est.nome}</td>
+        `;
+        tabelaEstudantesBody.appendChild(tr);
+
+        // select de estudante em matrícula
+        const option = document.createElement('option');
+        option.value = est.id;
+        option.textContent = `${est.id} - ${est.nome}`;
+        matEstudanteSelect.appendChild(option);
+      });
+    }
+
+    function renderDisciplinas() {
+      tabelaDisciplinasBody.innerHTML = '';
+      matDisciplinaSelect.innerHTML = '<option value="">Selecione uma disciplina</option>';
+
+      disciplinas.forEach(disc => {
+        // professor responsável
+        const professor = professores.find(p => p.id === disc.professorId);
+        const nomeProfessor = professor ? professor.nome : '—';
+
+        // alunos matriculados nessa disciplina
+        const matriculasDisc = matriculas.filter(m => m.disciplinaId === disc.id);
+        const nomesAlunos = matriculasDisc
+          .map(m => {
+            const est = estudantes.find(e => e.id === m.estudanteId);
+            return est ? est.nome : '(desconhecido)';
+          })
+          .join(', ') || 'Nenhum';
+
+        // linha da tabela
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${disc.id}</td>
+          <td>${disc.nome}</td>
+          <td>${disc.descricao}</td>
+          <td>${nomeProfessor}</td>
+          <td>${nomesAlunos}</td>
+        `;
+        tabelaDisciplinasBody.appendChild(tr);
+
+        // select de disciplina em matrícula
+        const option = document.createElement('option');
+        option.value = disc.id;
+        option.textContent = `${disc.id} - ${disc.nome}`;
+        matDisciplinaSelect.appendChild(option);
+      });
+    }
+
+    // Eventos dos formulários
+    formProfessor.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const nome = profNomeInput.value.trim();
+      if (!nome) return;
+
+      professores.push({ id: proximoIdProfessor++, nome });
+      profNomeInput.value = '';
+      renderProfessores();
+      renderDisciplinas(); // atualiza nomes de professores nas disciplinas
+    });
+
+    formDisciplina.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const nome = discNomeInput.value.trim();
+      const descricao = discDescInput.value.trim();
+      const professorId = parseInt(discProfessorSelect.value, 10);
+
+      if (!nome || !descricao || !professorId) return;
+
+      disciplinas.push({
+        id: proximoIdDisciplina++,
+        nome,
+        descricao,
+        professorId
+      });
+
+      discNomeInput.value = '';
+      discDescInput.value = '';
+      discProfessorSelect.value = '';
+
+      renderDisciplinas();
+    });
+
+    formEstudante.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const nome = estNomeInput.value.trim();
+      if (!nome) return;
+
+      estudantes.push({ id: proximoIdEstudante++, nome });
+      estNomeInput.value = '';
+
+      renderEstudantes();
+      renderDisciplinas(); // atualiza lista de alunos por disciplina (se houver matrículas)
+    });
+
+    formMatricula.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const estudanteId = parseInt(matEstudanteSelect.value, 10);
+      const disciplinaId = parseInt(matDisciplinaSelect.value, 10);
+
+      if (!estudanteId || !disciplinaId) return;
+
+      // evita matrícula duplicada
+      const jaExiste = matriculas.some(
+        m => m.estudanteId === estudanteId && m.disciplinaId === disciplinaId
+      );
+      if (!jaExiste) {
+        matriculas.push({ estudanteId, disciplinaId });
+        renderDisciplinas();
+      }
+    });
+
+    // Render inicial (vazio)
+    renderProfessores();
+    renderEstudantes();
+    renderDisciplinas();
+  </script>
+</body>
+</html>
