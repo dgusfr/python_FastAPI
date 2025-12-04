@@ -1,14 +1,13 @@
 from fastapi import FastAPI, Depends, HTTPException
-from database import SessionLocal, engine
 from sqlalchemy.orm import Session
+import models, schemas
+from database import engine, SessionLocal
 from typing import List
-import models
-import schemas
+from sqlalchemy.orm import joinedload
 
-# Cria as tabelas no PostgresSQL caso não existam
 models.Base.metadata.create_all(bind=engine)
-app = FastAPI()
 
+app = FastAPI()
 
 def get_db():
     db = SessionLocal()
@@ -17,18 +16,76 @@ def get_db():
     finally:
         db.close()
 
-
-@app.post("/estudantes/", response_model=schemas.StudentResponse)
-def create_student(student: schemas.StudentCreate, db: Session = Depends(get_db)):
-    # Desestruturamos os dados vindos do navegador e model_dump converte em um dicionario com os dados validados, para chamarmos o construtor e criarmos o objeto estudante
-    db_student = models.Student(**student.model_dump())
-    db.add(db_student)
+@app.post('/estudantes/', response_model=schemas.Estudante)
+def criar_estudante(
+        estudante: schemas.EstudanteCreate,
+        db: Session = Depends(get_db)
+    ):
+    db_estudante = models.Estudante(
+        nome = estudante.nome,
+        perfil = models.Perfil(**estudante.perfil.dict())
+    )
+    db.add(db_estudante)
     db.commit()
-    db.refresh(db_student)
-    return db_student
+    db.refresh(db_estudante)
+    return db_estudante
+
+@app.get('/estudantes/', response_model=List[schemas.Estudante])
+def listar_estudantes(db: Session = Depends(get_db)):
+    estudantes = db.query(models.Estudante).options(
+        joinedload(models.Estudante.perfil)
+    ).all()
+    return estudantes
+
+# DISCIPLINAS
+
+@app.post('/disciplinas/', response_model=schemas.Disciplina)
+def criar_disciplina(
+        disciplina: schemas.DisciplinaCreate,
+        db: Session = Depends(get_db)
+    ):
+    db_disciplina = models.Disciplina(**disciplina.dict())
+    db.add(db_disciplina)
+    db.commit()
+    db.refresh(db_disciplina)
+    return db_disciplina
+
+@app.get('/disciplinas/', response_model=List[schemas.Disciplina])
+def listar_disciplinas(db: Session = Depends(get_db)):
+    return db.query(models.Disciplina).all()
 
 
-@app.get("/estudantes/", response_model=List[schemas.StudentResponse])
-def read_students(db: Session = Depends(get_db)):
-    students = db.query(models.Student).all()
-    return students
+# PROFESSORES
+
+@app.post('/professores/', response_model=schemas.Professor)
+def criar_professor(
+        professor: schemas.ProfessorCreate,
+        db: Session = Depends(get_db)
+    ):
+    db_professor = models.Professor(**professor.dict())
+    db.add(db_professor)
+    db.commit()
+    db.refresh(db_professor)
+    return db_professor
+
+@app.get('/professores/', response_model=List[schemas.Professor])
+def listar_professores(db: Session = Depends(get_db)):
+    return db.query(models.Professor).all()
+
+
+# MATRÍCULAS
+
+@app.post('/matriculas/', response_model=schemas.Matricula)
+def criar_matricula(
+        matricula: schemas.MatriculaCreate,
+        db: Session = Depends(get_db)
+    ):
+    db_matricula = models.Matricula(**matricula.dict())
+    db.add(db_matricula)
+    db.commit()
+    db.refresh(db_matricula)
+    return db_matricula
+
+@app.get('/matriculas/', response_model=List[schemas.Matricula])
+def listar_matriculas(db: Session = Depends(get_db)):
+    return db.query(models.Matricula).all()
