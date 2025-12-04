@@ -24,7 +24,7 @@ def get_db():
 @app.post("/estudantes/", response_model=schemas.Estudante)
 def criar_estudante(estudante: schemas.EstudanteCreate, db: Session = Depends(get_db)):
     db_estudante = models.Estudante(
-        nome=estudante.nome, perfil=models.Perfil(**estudante.perfil.dict())
+        nome=estudante.nome, perfil=models.Perfil(**estudante.perfil.model_dump())
     )
     db.add(db_estudante)
     db.commit()
@@ -46,7 +46,7 @@ def listar_estudantes(db: Session = Depends(get_db)):
 def criar_disciplina(
     disciplina: schemas.DisciplinaCreate, db: Session = Depends(get_db)
 ):
-    db_disciplina = models.Disciplina(**disciplina.dict())
+    db_disciplina = models.Disciplina(**disciplina.model_dump())
     db.add(db_disciplina)
     db.commit()
     db.refresh(db_disciplina)
@@ -61,7 +61,7 @@ def listar_disciplinas(db: Session = Depends(get_db)):
 # Cria um novo professor e salva no banco, retornando o professor criado.
 @app.post("/professores/", response_model=schemas.Professor)
 def criar_professor(professor: schemas.ProfessorCreate, db: Session = Depends(get_db)):
-    db_professor = models.Professor(**professor.dict())
+    db_professor = models.Professor(**professor.model_dump())
     db.add(db_professor)
     db.commit()
     db.refresh(db_professor)
@@ -76,7 +76,7 @@ def listar_professores(db: Session = Depends(get_db)):
 # Cria uma nova matrícula e salva no banco, retornando a matrícula criada.
 @app.post("/matriculas/", response_model=schemas.Matricula)
 def criar_matricula(matricula: schemas.MatriculaCreate, db: Session = Depends(get_db)):
-    db_matricula = models.Matricula(**matricula.dict())
+    db_matricula = models.Matricula(**matricula.model_dump())
     db.add(db_matricula)
     db.commit()
     db.refresh(db_matricula)
