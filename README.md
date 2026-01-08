@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # API de Gerenciamento Escolar - FastAPI
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python&logoColor=white)
@@ -117,6 +116,3 @@ curl -X POST http://localhost:8000/matriculas/ \
 ---
 
 Desenvolvido por **Diego Franco**
-=======
-My first API with fastAPI
->>>>>>> 1ea9783b581456b759faa194cdb2d099e261ac22
